@@ -1,2 +1,8 @@
 # Rmd-template
-A Rmd-template with cross reference.
+
+A Rmarkdown template with cross-reference based on
+[autonumfigs](https://github.com/ajlyons/autonumfigs).
+
+
+
+

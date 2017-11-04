@@ -1,0 +1,192 @@
+---
+title: "Un modèle de **Rmarkdown**"
+author: "DU Qiming"
+date: "03 décembre 2017" 
+output:
+  html_document:
+    fig_caption: yes
+---
+
+
+```{r cap_ref_functions, include=FALSE}
+############################## configuration ############################## 
+library(knitr)
+## Get the name of this Rmd file
+rmdFn <- knitr::current_input()  # filename of input document
+## Read lines and close connection
+rmdCon <- file(rmdFn, open = "r")
+rmdLines <- readLines(rmdCon)
+close(rmdCon)
+## Pull out all occurences of at least one back tick, followed 
+## by any number of characters, followed by fig$cap (all on one line)
+figscap_idx <- grep("`+(.*)fig\\$cap", rmdLines)
+rmdLines <- rmdLines[figscap_idx]
+## Get rid of everything up until the start of the caption label
+## This presumes the caption label is the first argument of fig$cap()
+## E.g., fig.cap = fig$cap("my_label", ...)
+rmdLinesSansPre <- sub("(.*)fig\\$cap(.*?)[\"']", "", rmdLines)
+## Identify everything up until the first quote
+match_data <- regexpr("(.*?)[\"']", rmdLinesSansPre)
+## Reduce the length by one, because we're not interested in the final quote
+attr(match_data, "match.length") <- attr(match_data, "match.length") - 1
+## Extract
+fig_labels <- regmatches(rmdLinesSansPre, match_data, invert=FALSE)
+if (length(fig_labels) > 0) {
+    ## Test for duplicates
+    if (anyDuplicated(fig_labels) > 0) stop("Duplicate caption labels detected")
+    ## Create a named list of Figure numbers
+    ref <- as.list(1:length(fig_labels))
+    names(ref) <- fig_labels
+}
+
+## A function for generating captions and cross-references
+fig <- local({
+  i <- 0
+  list(
+    cap=function(refName, text, col="darkred") {
+      i <<- i + 1
+      ref[[refName]] <<- i
+      css_ctr <- "text-align:center; display:inline-block; width:100%;"
+      cap_txt <- paste0("<span style=\"color:", col, "; ", css_ctr, "\">Figure ", i, ": ", text , "</span>")
+      return(paste0(refName,'&',cap_txt))
+
+    },
+    
+    ref=function(refName, checkRef=TRUE) {
+    if (checkRef && !refName %in% names(ref)) stop(paste0("fig$ref() error: ", refName, " not found"))
+        paste0("<A HREF=\"#fig", refName, "\">Figure ", ref[[refName]], "</A>")})})
+## Replace default hook for processing plots & add figure anchor
+knit_hooks$set(plot = function(x, options,
+                             fig_scale_factor = "80%") {
+  sty <- paste0(" style=\"text-align:center", ";\"")
+  info = strsplit(options$fig.cap,'&')[[1]]
+  refName = info[1]
+  cap_txt = info[2]
+  figanchor <- paste0("<a name=\"fig", refName, "\"></a>")
+  paste('<figure', sty, '>', figanchor, '<img src="',
+    opts_knit$get('base.url'), paste(x, collapse = '.'),
+    '" width = ',fig_scale_factor, '><figcaption>', cap_txt, '</figcaption></figure>','<p></p>',
+    sep = '')
+})
+
+############################## configuration ############################## 
+```
+
+## I : Bases de la mise en forme de texte Rmarkdown
+
+### I.1 Les **md** qui sont valables dans **Rmd**
+
+italique = *italique*
+
+gras = **gras** = __gras__
+
+italique gras = ***italique gras***
+
+barré = ~~barré~~
+
+### I.2 Quelques exemples sur $\LaTeX$
+
+On écrit $X_1,\dots,X_n$ un échantillons i.i.d. de loi normale. C'est-à-dire,
+
+$$
+X_1 \sim \mathcal{N}(\mu, \sigma^2)
+$$
+
+avec $\mu\in \mathbb{R}$ et $\sigma \in \mathbb{R}_+^*$.
+
+(Ref : [Latex syntax](https://en.wikibooks.org/wiki/LaTeX/Mathematics))
+
+
+
+## II : Quelques remarques sur les plots
+
+### II.1 : Changer la taille d'une figure 
+
+Voici les deux exemples avec **fig.height** et **fig.width**
+différents : Ils ne change pas la vraie taille d'une
+figure. Par contre, ils changent la proportion de
+longeur et largeur. **Attention !** Ce n'est plus valable
+si on utilise un Rmarkdown normal sans la configuration
+qu'on a fait. 
+
+
+```{r, fig.height=3, fig.width=8 ,fig.cap=fig$cap("label_cos_wav", "la courbe de Cosinus (Discription)" ), echo = FALSE}
+
+par(mar=c(2.5, 2.5, 0.5, 0.5)); plot(x=0:100*pi/50, y=cos(0:100*pi/50), cex=0.5, xlab="x", ylab="cos(x)")
+
+```
+
+```{r, fig.cap=fig$cap("cos_wav_alt", " la même courbe de forme différente"), echo = FALSE}
+par(mar=c(2.5, 2.5, 0.5, 0.5)); plot(x=0:100*pi/50, y=cos(0:100*pi/50), cex=0.5, xlab="x", ylab="cos(x)")
+```
+
+### II.2 Matrice des figures
+
+```{r,  fig.cap=fig$cap("hist", "une matrice de histogramme"), echo = FALSE}
+# One figure in row 1 and two figures in row 2
+layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+hist(rnorm(500), breaks=30)
+hist(rexp(500), breaks=30)
+hist(runif(500), breaks=30)
+```
+
+### II.3 Un exemple sur **legend()**
+
+```{r, fig.cap=fig$cap("legend", "un exemple sur legend() "), echo = TRUE}
+
+X = seq(-10,10,by = 0.1)
+n = length(X)
+sigma = 4
+
+epsilon = rnorm(n,0,sigma)
+
+f = function(x){
+  return(0.02*x^3 + 0.5*x^2 + 5*sin(x))
+}
+
+Y = f(X) + epsilon
+
+######################################################################
+
+X_expanded = cbind(X,X^2)
+model = lm(Y~X_expanded)
+Y_predict = predict(model,data.frame(X))
+
+######################################################################
+
+plot(X, f(X), type = 'l', lwd = 2, main = 'Exemple de legend()', xlab = 'X', ylab = 'Y',col = 'darkred')
+points(X, Y, type = 'b', lwd = 1, col = 'grey', pch = 1, lty = 2)
+lines(X, Y_predict, lwd = 2)
+legend('topleft', c('fonction à estimer','observations','estimation'), col = c('darkred','grey',1), lwd = c(2,1,2), pch = c(-1,1,-1), lty = c(1,2,1))
+grid()
+```
+
+## III. Cross References
+
+Pour les commentaires, on peut utiliser `r fig$ref("label_cos_wav")` pour faire la référence.
+
+([more details](https://github.com/ajlyons/autonumfigs))
+
+## IV. Moyen de l'usage  
+
+On peut copier coller directement ce fichier dans **Rstudio**, tous les packages nécéssaires seront installés automatiquement par 
+**Rstudio**.
+
+Sinon, il faut installer [**pandoc**](https://pandoc.org/) et le package **rmarkdown** de **R**.
+
+```
+# Ubuntu
+sudo apt install pandoc
+```
+
+
+Pour compiler, il faut juste taper
+
+```
+library(rmarkdown)
+render('Rmd_template.Rmd')
+
+```
+
+dans **R**.
+

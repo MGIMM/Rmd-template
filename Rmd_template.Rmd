@@ -1,10 +1,11 @@
 ---
 title: "Un modèle de **Rmarkdown**"
-author: "par NOM1 Prénom1 et NOM2 Prénom2"
-date: "xx décembre 2017" 
+author: "par DU Qiming"
+date: "6 novembre 2017"
 output:
   html_document:
     fig_caption: yes
+  pdf_document: default
 ---
 
 
@@ -73,7 +74,7 @@ knit_hooks$set(plot = function(x, options,
 ############################## configuration ############################## 
 ```
 
-## I : Bases de la mise en forme de texte Rmarkdown
+## I : Bases pour la mise en forme de texte avec Rmarkdown (utilisation de *, \~)
 
 ### I.1 Les **md** qui sont valables dans **Rmd**
 
@@ -85,7 +86,7 @@ italique gras = ***italique gras***
 
 barré = ~~barré~~
 
-### I.2 Quelques exemples sur $\LaTeX$
+### I.2 Quelques exemples de $\LaTeX$
 
 On écrit $X_1,\dots,X_n$ un échantillons i.i.d. de loi normale. C'est-à-dire,
 
@@ -101,14 +102,13 @@ avec $\mu\in \mathbb{R}$ et $\sigma \in \mathbb{R}_+^*$.
 
 ## II : Quelques remarques sur les plots
 
-### II.1 : Changer la taille d'une figure 
+### II.1 : Pour changer la taille d'une figure 
 
-Voici les deux exemples avec **fig.height** et **fig.width**
-différents : Ils ne change pas la vraie taille d'une
-figure. Par contre, ils changent la proportion de
+Voici les deux exemples avec **fig.height** et **fig.width** : ils ne changent pas la vraie taille d'une
+figure. En revanche, ils changent la proportion de
 longeur et largeur. **Attention !** Ce n'est plus valable
 si on utilise un Rmarkdown normal sans la configuration
-qu'on a fait. 
+qu'on a faite. 
 
 
 ```{r, fig.height=3, fig.width=8 ,fig.cap=fig$cap("cos_wav (label)", "la courbe de Cosinus (Discription)" ), echo = FALSE}
@@ -117,13 +117,13 @@ par(mar=c(2.5, 2.5, 0.5, 0.5)); plot(x=0:100*pi/50, y=cos(0:100*pi/50), cex=0.5,
 
 ```
 
-```{r, fig.cap=fig$cap("cos_wav_alt", " la même courbe de forme différente"), echo = FALSE}
+```{r, fig.cap=fig$cap("cos_wav_alt", " la même courbe à une échelle différente"), echo = FALSE}
 par(mar=c(2.5, 2.5, 0.5, 0.5)); plot(x=0:100*pi/50, y=cos(0:100*pi/50), cex=0.5, xlab="x", ylab="cos(x)")
 ```
 
-### II.2 Matrice des figures
+### II.2 Matrice de figures
 
-```{r,  fig.cap=fig$cap("hist", "une matrice de histogramme"), echo = FALSE}
+```{r,  fig.cap=fig$cap("hist", "Matrice d'histogrammes"), echo = FALSE}
 # One figure in row 1 and two figures in row 2
 layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
 hist(rnorm(500), breaks=30)
@@ -131,9 +131,9 @@ hist(rexp(500), breaks=30)
 hist(runif(500), breaks=30)
 ```
 
-### II.3 Un exemple sur **legend()**
+### II.3 Un exemple d'utilisation de **legend()**
 
-```{r, fig.cap=fig$cap("legend", "un exemple sur legend() "), echo = TRUE}
+```{r, fig.cap=fig$cap("legend", "un exemple avec legend() "), echo = TRUE}
 
 X = seq(-10,10,by = 0.1)
 n = length(X)
@@ -164,22 +164,22 @@ grid()
 
 ## III. Cross References
 
-Pour les commentaires, on peut utiliser `r fig$ref("cos_wav (label)")` pour faire la référence.
+Pour faire référence à une figure dans les commentaires, on peut utiliser `r fig$ref("cos_wav (label)")`.
 
 ([more details](https://github.com/ajlyons/autonumfigs))
 
-Si on veut une figure sans caption :
+Si on veut une figure sans légende :
 
 ```{r, fig.cap=fig$cap(), echo = FALSE}
 plot(rnorm(100))
 ```
 
-**Attention !** Il faut evider le cas où un code bloque
-crée 2 figures. On pourrais consider à faire une
-matrice de figures.
+**Attention !** Pour éviter les problèmes de référencement des figures, il  faut éviter qu'un bloc de code 
+crée 2 figures. Dans ce cas, il est préférable de créer une
+matrice de figures avec un seul numéro de figure.
 
 
-```{r, fig.width = 10, fig.height = 8, fig.cap=fig$cap("lm", "diagonistic de modèle linéaire"), echo = FALSE}
+```{r, fig.width = 10, fig.height = 8, fig.cap=fig$cap("lm", "Diagonistique pour le modèle linéaire"), echo = FALSE}
 layout(matrix(c(1,1,2,3,4,5), 2, 3, byrow = TRUE))
 plot(X, f(X), type = 'l', lwd = 2, xlab = 'X', ylab = 'Y',col = 'darkred')
 points(X, Y, type = 'b', lwd = 1, col = 'grey', pch = 1, lty = 2)
@@ -191,10 +191,10 @@ plot(model)
 
 
 
-## IV. Moyen de l'usage  
+## IV. Utilisation de rmarkdown 
 
-On peut copier coller directement ce fichier dans **Rstudio**, tous les packages nécéssaires seront installés automatiquement par 
-**Rstudio**.
+On peut  directement copier-coller ce fichier dans **Rstudio**, tous les packages nécéssaires seront installés automatiquement par 
+**Rstudio**. Pour l'exécuter, il faut cliquer sur **Knit to HTML**.
 
 Sinon, il faut installer [**pandoc**](https://pandoc.org/) et le package **rmarkdown** de **R**.
 

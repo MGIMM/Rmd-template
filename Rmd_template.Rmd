@@ -191,9 +191,9 @@ plot(model)
 
 
 
-## IV. Utilisation de rmarkdown 
+## IV. Utilisation de Rmarkdown 
 
-On peut  directement copier-coller ce fichier dans **Rstudio**, tous les packages nécéssaires seront installés automatiquement par 
+On peut  directement copier-coller ce fichier dans **Rstudio**, tous les packages nécessaires seront installés automatiquement par 
 **Rstudio**. Pour l'exécuter, il faut cliquer sur **Knit to HTML**.
 
 Sinon, il faut installer [**pandoc**](https://pandoc.org/) et le package **rmarkdown** de **R**.
